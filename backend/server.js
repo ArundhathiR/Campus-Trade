@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/products", productRoutes);
-
+app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth", authRoutes);
 
