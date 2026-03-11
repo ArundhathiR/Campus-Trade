@@ -6,11 +6,13 @@ const {
   createProduct,
   getProducts,
   getProductById,
-  deleteProduct
+  deleteProduct,
+  getMyProducts
 } = require("../controllers/productController");
 
 router.post("/", upload.single("image"), createProduct);
 router.get("/", getProducts);
+router.get("/my-products", getMyProducts); // must come before /:id
 router.get("/:id", getProductById);
 router.delete("/:id", deleteProduct);
 
