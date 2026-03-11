@@ -1,0 +1,68 @@
+/* Form.css */
+.form-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+/* Text Inputs & Textarea */
+.form-input, .form-textarea {
+  padding: 12px 15px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 16px; /* Prevents auto-zoom on mobile */
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+.form-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Blue Focus Border */
+.form-input:focus, .form-textarea:focus {
+  border-color: #3498db;
+}
+
+/* Custom File Upload Button */
+.file-upload-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.file-upload-btn {
+  display: block;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 2px dashed #bdc3c7;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.file-upload-btn:hover {
+  background: #edf2f7;
+  border-color: #3498db;
+}
+
+.hidden-input {
+  display: none;
+}
