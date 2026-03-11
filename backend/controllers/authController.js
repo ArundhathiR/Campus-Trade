@@ -32,11 +32,11 @@ exports.loginUser = async (req, res) => {
     }
 
     // Generate Token
-    const token = jwt.sign(
-      { id: user._id }, 
-      "campus_secret_key", // Use a real secret in .env later
-      { expiresIn: "1d" }
-    );
+   const token = jwt.sign(
+  { id: user._id },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
 
     res.json({
       message: "Login successful",
