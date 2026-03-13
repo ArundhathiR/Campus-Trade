@@ -1,25 +1,60 @@
 const express = require("express");
 const router = express.Router();
 
-const upload = require("../middleware/upload");
-const authMiddleware = require("../middleware/authMiddleware");
+const multer = require("multer");
 
 const {
   createProduct,
   getProducts,
   getProductById,
-  deleteProduct,
-  getMyProducts
+  getMyProducts,
+  deleteProduct
 } = require("../controllers/productController");
 
-router.post("/", authMiddleware, upload.single("image"), createProduct);
+const authMiddleware = require("../middleware/authMiddleware");
+
+
+// Multer storage
+const storage = multer.diskStorage({
+
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
+  },
+
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  }
+
+});
+
+const upload = multer({ storage });
+
+
+
+// ROUTES
 
 router.get("/", getProducts);
 
-router.get("/my-products", authMiddleware, getMyProducts);
-
 router.get("/:id", getProductById);
 
-router.delete("/:id", authMiddleware, deleteProduct);
+router.post(
+  "/",
+  authMiddleware,
+  upload.single("image"),
+  createProduct
+);
+
+router.get(
+  "/my-products",
+  authMiddleware,
+  getMyProducts
+);
+
+router.delete(
+  "/:id",
+  authMiddleware,
+  deleteProduct
+);
+
 
 module.exports = router;

@@ -1,72 +1,126 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+// Optional: install lucide-react for professional icons
+import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
+
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 function Login() {
   const navigate = useNavigate();
+  
+  // States
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: ""
-  });
+  // Focus the email input on load
+  const emailRef = React.useRef(null);
+  useEffect(() => { emailRef.current?.focus(); }, []);
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError(""); // Clear error when user starts typing again
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData, {
+        headers: { "Content-Type": "application/json" }
+      });
 
-      localStorage.setItem("token", res.data.token);
-
-      alert("Login successful");
-
+      const { token, user } = response.data;
+      
+      // Securely store token
+      localStorage.setItem("token", token);
+      // It's professional to store user info in a Context/Redux store here
+      
       navigate("/seller");
-
     } catch (err) {
-      alert("Login failed");
-      console.log(err);
+      const message = err.response?.data?.message || "Invalid credentials. Please try again.";
+      setError(message);
+      console.error("Login Error:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h2>Login</h2>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>Welcome Back</h2>
+        <p style={styles.subtitle}>Log in to manage your trade</p>
 
-      <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          {error && <div style={styles.errorBanner}>{error}</div>}
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          onChange={handleChange}
-        />
+          <div style={styles.inputGroup}>
+            <Mail size={18} style={styles.icon} />
+            <input
+              ref={emailRef}
+              type="email"
+              name="email"
+              placeholder="Email Address"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              style={styles.input}
+            />
+          </div>
 
-        <br /><br />
+          <div style={styles.inputGroup}>
+            <Lock size={18} style={styles.icon} />
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              required
+              value={formData.password}
+              onChange={handleChange}
+              style={styles.input}
+            />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)}
+              style={styles.eyeButton}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          onChange={handleChange}
-        />
-
-        <br /><br />
-
-        <button type="submit">Login</button>
-
-      </form>
+          <button 
+            type="submit" 
+            disabled={isLoading} 
+            style={{...styles.button, opacity: isLoading ? 0.7 : 1}}
+          >
+            {isLoading ? <Loader2 style={styles.spinner} /> : "Sign In"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
+
+// Minimalist Professional Styles
+const styles = {
+  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f7f6' },
+  card: { padding: '40px', backgroundColor: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px' },
+  title: { margin: '0 0 8px', fontSize: '24px', fontWeight: 'bold', textAlign: 'center' },
+  subtitle: { margin: '0 0 24px', color: '#666', textAlign: 'center' },
+  form: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  inputGroup: { position: 'relative', display: 'flex', alignItems: 'center' },
+  icon: { position: 'absolute', left: '12px', color: '#999' },
+  input: { width: '100%', padding: '12px 12px 12px 40px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', outline: 'none' },
+  eyeButton: { position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' },
+  button: { padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', justifyContent: 'center' },
+  errorBanner: { padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '6px', fontSize: '14px', textAlign: 'center' },
+  spinner: { animation: 'spin 1s linear infinite' }
+};
 
 export default Login;
