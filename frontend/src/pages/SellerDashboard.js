@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import CreateProduct from "../components/CreateProduct"; // Keep these for later use
-import MyProducts from "../components/MyProducts";
+import MyProducts from "./MyProducts";
 import "./Form.css";
 
 const SellerDashboard = () => {
@@ -23,29 +23,41 @@ const SellerDashboard = () => {
   const handleFileChange = (e) => {
   setFormData({ ...formData, image: e.target.files[0] });
 };
- const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Change the name here to 'data' to avoid confusion with the state 'formData'
   const data = new FormData();
-  
-  // Now we pull from the STATE (formData) and put it into the data object
   data.append("title", formData.title);
-  data.append("description", formData.description); // Don't forget this!
+  data.append("description", formData.description);
   data.append("price", formData.price);
   data.append("category", formData.category);
   data.append("image", formData.image);
 
   try {
-    const response = await axios.post("http://localhost:5000/api/products", data);
+    // 1. Get the token from localStorage
+    const token = localStorage.getItem("token"); 
+
+    // 2. Add the Authorization Header to the request
+    const response = await axios.post("http://localhost:5000/api/products", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}` // This is the secret handshake!
+      }
+    });
+
     console.log("Product created:", response.data);
     alert("Product created successfully!");
     
-    // Optional: Refresh or redirect
-    // window.location.reload(); 
+    // Optional: Reset form after success
+    setFormData({ title: "", description: "", price: "", category: "", image: null });
+    
   } catch (error) {
     console.error("Error creating product:", error);
-    alert("Check your server—it might not be running on port 5000.");
+    if (error.response?.status === 401) {
+      alert("Session expired. Please login again.");
+    } else {
+      alert("Error posting advertisement. Check your connection.");
+    }
   }
 };
 
