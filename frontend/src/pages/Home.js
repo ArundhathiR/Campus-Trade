@@ -1,38 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { fetchProducts } from "../services/productService";
+import axios from "axios";
 import ProductCard from "../components/ProductCard";
- // Ensure this is imported to see the background and fonts!
+import "./Home.css";
 
-const Home = () => {
+function Home() {
+
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const loadProducts = async () => {
-      const data = await fetchProducts();
-      setProducts(data);
-    };
-    loadProducts();
+
+    axios.get("http://localhost:5000/api/products")
+      .then(res => setProducts(res.data))
+      .catch(err => console.log(err));
+
   }, []);
 
   return (
-    /* Use the 'container' class to center the page and add padding */
-    <div className="container">
-      <h1 className="text-center mt-20">Campus Trade Products</h1>
+    <div className="home-container">
 
-      {/* Replace the inline style with 'product-grid'. 
-         This allows our CSS file to handle the layout.
-      */}
+      <h2 className="home-title">Latest Products</h2>
+
       <div className="product-grid">
-        {products.length > 0 ? (
-          products.map((product) => (
-            <ProductCard key={product._id} product={product}/>
-          ))
-        ) : (
-          <p className="text-center">Loading products...</p>
-        )}
+
+        {products.map(product => (
+          <ProductCard key={product._id} product={product}/>
+        ))}
+
       </div>
+
     </div>
   );
-};
+}
 
 export default Home;

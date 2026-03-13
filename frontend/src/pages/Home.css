@@ -21,3 +21,13 @@
     padding: 10px;
   }
 }
+.home-container{
+  padding:40px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.home-title{
+  font-size:24px;
+  margin-bottom:10px;
+}

@@ -61,3 +61,35 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+/* Make card width responsive */
+.product-card{
+  width:100%;
+  max-width:250px;
+}
+
+/* Better spacing for mobile */
+@media (max-width:600px){
+  .card-image-container{
+    height:150px;
+  }
+
+  .product-title{
+    font-size:1rem;
+  }
+
+  .product-price{
+    font-size:1.1rem;
+  }
+}
+.product-card:hover .product-image{
+  transform:scale(1.05);
+}
+
+.product-image{
+  transition:transform 0.3s ease;
+}
+.product-link{
+  text-decoration:none;
+  color:inherit;
+  display:block;
+}

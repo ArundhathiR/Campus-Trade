@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-// Optional: install lucide-react for professional icons
 import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
@@ -9,20 +8,18 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api
 function Login() {
   const navigate = useNavigate();
   
-  // States
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Focus the email input on load
   const emailRef = React.useRef(null);
   useEffect(() => { emailRef.current?.focus(); }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    if (error) setError(""); // Clear error when user starts typing again
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -31,21 +28,16 @@ function Login() {
     setError("");
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData, {
-        headers: { "Content-Type": "application/json" }
-      });
+      // Note: Ensure your backend route is correct (e.g., /users/login or /auth/login)
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
 
-      const { token, user } = response.data;
-      
-      // Securely store token
+      const { token } = response.data;
       localStorage.setItem("token", token);
-      // It's professional to store user info in a Context/Redux store here
       
       navigate("/seller");
     } catch (err) {
       const message = err.response?.data?.message || "Invalid credentials. Please try again.";
       setError(message);
-      console.error("Login Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -99,15 +91,22 @@ function Login() {
             disabled={isLoading} 
             style={{...styles.button, opacity: isLoading ? 0.7 : 1}}
           >
-            {isLoading ? <Loader2 style={styles.spinner} /> : "Sign In"}
+            {isLoading ? <Loader2 className="spinner-icon" size={20} /> : "Sign In"}
           </button>
         </form>
+
+        {/* --- ADDED REGISTER LINK HERE --- */}
+        <p 
+          onClick={() => navigate("/register")} 
+          style={styles.registerLink}
+        >
+          Don't have an account? <span style={styles.linkText}>Register here.</span>
+        </p>
       </div>
     </div>
   );
 }
 
-// Minimalist Professional Styles
 const styles = {
   container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f7f6' },
   card: { padding: '40px', backgroundColor: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px' },
@@ -120,7 +119,8 @@ const styles = {
   eyeButton: { position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' },
   button: { padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', justifyContent: 'center' },
   errorBanner: { padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '6px', fontSize: '14px', textAlign: 'center' },
-  spinner: { animation: 'spin 1s linear infinite' }
+  registerLink: { marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px', cursor: 'pointer' },
+  linkText: { color: '#007bff', fontWeight: '600' }
 };
 
 export default Login;
