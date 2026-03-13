@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
-import CreateProduct from "../components/CreateProduct"; // Keep these for later use
 import MyProducts from "./MyProducts";
 import "./Form.css";
 
 const SellerDashboard = () => {
-  // 1. State to store form data
+  // 1. State: Removed description
   const [formData, setFormData] = useState({
     title: "",
-    description: "",
     price: "",
     category: "",
     image: null
@@ -21,45 +19,56 @@ const SellerDashboard = () => {
 
   // 3. Handle image selection
   const handleFileChange = (e) => {
-  setFormData({ ...formData, image: e.target.files[0] });
-};
-const handleSubmit = async (e) => {
-  e.preventDefault();
+    setFormData({ ...formData, image: e.target.files[0] });
+  };
 
-  const data = new FormData();
-  data.append("title", formData.title);
-  data.append("description", formData.description);
-  data.append("price", formData.price);
-  data.append("category", formData.category);
-  data.append("image", formData.image);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    // 1. Get the token from localStorage
-    const token = localStorage.getItem("token"); 
+    const data = new FormData();
+    data.append("title", formData.title);
+    // Setting a default description so the backend doesn't complain
+    data.append("description", "No description provided"); 
+    data.append("price", formData.price);
+    data.append("category", formData.category);
+    data.append("image", formData.image);
 
-    // 2. Add the Authorization Header to the request
-    const response = await axios.post("http://localhost:5000/api/products", data, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${token}` // This is the secret handshake!
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await axios.post(
+        "http://localhost:5000/api/products",
+        data,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data" 
+          }
+        }
+      );
+
+      console.log("Product created:", response.data);
+      alert("Product created successfully!");
+      
+      // Reset form
+      setFormData({ title: "", price: "", category: "", image: null });
+      
+    } catch (error) {
+      console.error("Error creating product:", error);
+      
+      if (error.response) {
+        if (error.response.status === 401) {
+          alert("Session expired. Please login again.");
+        } else {
+          alert(`Server Error: ${error.response.data.message || "Something went wrong"}`);
+        }
+      } else if (error.request) {
+        alert("Cannot reach the server. Please ensure your Backend is running on port 5000.");
+      } else {
+        alert(`Error: ${error.message}`);
       }
-    });
-
-    console.log("Product created:", response.data);
-    alert("Product created successfully!");
-    
-    // Optional: Reset form after success
-    setFormData({ title: "", description: "", price: "", category: "", image: null });
-    
-  } catch (error) {
-    console.error("Error creating product:", error);
-    if (error.response?.status === 401) {
-      alert("Session expired. Please login again.");
-    } else {
-      alert("Error posting advertisement. Check your connection.");
-    }
-  }
-};
+    } // FIXED: Extra brace removed from here
+  };
 
   return (
     <div className="container">
@@ -74,39 +83,43 @@ const handleSubmit = async (e) => {
               type="text" 
               className="form-input" 
               placeholder="e.g. Engineering Graphics Set" 
+              value={formData.title}
               onChange={handleChange}
+              required
             />
           </div>
 
-         <div className="form-group">
-  <label>Price (₹)</label>
-  <input 
-    name="price"
-    type="number" 
-    className="form-input" 
-    onChange={handleChange} 
-  />
-</div>
+          <div className="form-group">
+            <label>Price (₹)</label>
+            <input 
+              name="price"
+              type="number" 
+              className="form-input" 
+              value={formData.price}
+              onChange={handleChange} 
+              required
+            />
+          </div>
 
-<div className="form-group">
-  <label>Category</label>
-  <select name="category" className="form-input" onChange={handleChange}>
-    <option value="">Select Category</option>
-    <option value="Books">Books</option>
-    <option value="Electronics">Electronics</option>
-    <option value="Lab Gear">Lab Gear</option>
-  </select>
-</div>
+          <div className="form-group">
+            <label>Category</label>
+            <select name="category" className="form-input" value={formData.category} onChange={handleChange} required>
+              <option value="">Select Category</option>
+              <option value="Books">Books</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Lab Gear">Lab Gear</option>
+            </select>
+          </div>
 
           <div className="form-group">
             <label>Product Image</label>
             <label className="file-upload-btn">
-              {/* Show the file name if a file is selected */}
               <span>{formData.image ? formData.image.name : "+ Click to upload photo"}</span>
               <input 
                 type="file" 
                 className="hidden-input" 
                 onChange={handleFileChange}
+                accept="image/*"
               />
             </label>
           </div>
@@ -117,7 +130,6 @@ const handleSubmit = async (e) => {
         </form>
       </div>
 
-      {/* 4. Displaying your products below the form */}
       <div className="mt-20">
         <hr />
         <h3 className="text-center mt-20">Your Active Listings</h3>

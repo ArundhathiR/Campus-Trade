@@ -1,33 +1,67 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import "./ProductDetails.css";
 
 function ProductDetails() {
 
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/products/${id}`)
-      .then(res => setProduct(res.data))
-      .catch(err => console.log(err));
+    axios
+      .get(`http://localhost:5000/api/products/${id}`)
+      .then((res) => {
+        setProduct(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
   }, [id]);
 
-  if (!product) return <p>Loading...</p>;
+  if (loading) return <p className="loading">Loading product...</p>;
+
+  if (!product) return <p className="error">Product not found</p>;
+
+  const imageUrl = product.image
+    ? `http://localhost:5000/${product.image}`
+    : "https://via.placeholder.com/400";
 
   return (
-    <div>
+    <div className="product-details-container">
 
-      <img
-        src={`http://localhost:5000/${product.image}`}
-        alt={product.title}
-        width="100"
-      />
+      <div className="product-image-section">
+        <img
+          src={imageUrl}
+          alt={product.title}
+          className="product-details-image"
+        />
+      </div>
 
-      <h2>{product.title}</h2>
-      <p>{product.description}</p>
-      <h3>₹{product.price}</h3>
-      <p>Category: {product.category}</p>
+      <div className="product-info-section">
+
+        <h1 className="product-details-title">{product.title}</h1>
+
+        <p className="product-details-category">
+          Category: {product.category}
+        </p>
+
+        <p className="product-details-description">
+          {product.description}
+        </p>
+
+        <h2 className="product-details-price">
+          ₹{product.price}
+        </h2>
+
+        <button className="add-to-cart-btn">
+          Add to Cart
+        </button>
+
+      </div>
 
     </div>
   );
