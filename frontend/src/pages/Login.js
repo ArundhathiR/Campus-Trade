@@ -1,42 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
+import { AuthContext } from "../context/AuthContext";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 function Login() {
   const navigate = useNavigate();
-  
+
+  const { login } = useContext(AuthContext); // ✅ get login from context
+
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const emailRef = React.useRef(null);
-  useEffect(() => { emailRef.current?.focus(); }, []);
+
+  useEffect(() => {
+    emailRef.current?.focus();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setIsLoading(true);
     setError("");
 
     try {
-      // Note: Ensure your backend route is correct (e.g., /users/login or /auth/login)
-      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/login`,
+        formData
+      );
 
-      const { token } = response.data;
-      localStorage.setItem("token", token);
-      
+      const { token, user } = response.data;
+
+      // ✅ update auth context
+      login(user, token);
+
+      // ✅ redirect instantly
       navigate("/seller");
+
     } catch (err) {
-      const message = err.response?.data?.message || "Invalid credentials. Please try again.";
+      const message =
+        err.response?.data?.message ||
+        "Invalid credentials. Please try again.";
+
       setError(message);
     } finally {
       setIsLoading(false);
@@ -77,8 +94,9 @@ function Login() {
               onChange={handleChange}
               style={styles.input}
             />
-            <button 
-              type="button" 
+
+            <button
+              type="button"
               onClick={() => setShowPassword(!showPassword)}
               style={styles.eyeButton}
             >
@@ -86,21 +104,25 @@ function Login() {
             </button>
           </div>
 
-          <button 
-            type="submit" 
-            disabled={isLoading} 
-            style={{...styles.button, opacity: isLoading ? 0.7 : 1}}
+          <button
+            type="submit"
+            disabled={isLoading}
+            style={{ ...styles.button, opacity: isLoading ? 0.7 : 1 }}
           >
-            {isLoading ? <Loader2 className="spinner-icon" size={20} /> : "Sign In"}
+            {isLoading ? (
+              <Loader2 className="spinner-icon" size={20} />
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
-        {/* --- ADDED REGISTER LINK HERE --- */}
-        <p 
-          onClick={() => navigate("/register")} 
+        <p
+          onClick={() => navigate("/register")}
           style={styles.registerLink}
         >
-          Don't have an account? <span style={styles.linkText}>Register here.</span>
+          Don't have an account?{" "}
+          <span style={styles.linkText}>Register here.</span>
         </p>
       </div>
     </div>
@@ -108,19 +130,94 @@ function Login() {
 }
 
 const styles = {
-  container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f4f7f6' },
-  card: { padding: '40px', backgroundColor: '#fff', borderRadius: '12px', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', width: '100%', maxWidth: '400px' },
-  title: { margin: '0 0 8px', fontSize: '24px', fontWeight: 'bold', textAlign: 'center' },
-  subtitle: { margin: '0 0 24px', color: '#666', textAlign: 'center' },
-  form: { display: 'flex', flexDirection: 'column', gap: '16px' },
-  inputGroup: { position: 'relative', display: 'flex', alignItems: 'center' },
-  icon: { position: 'absolute', left: '12px', color: '#999' },
-  input: { width: '100%', padding: '12px 12px 12px 40px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', outline: 'none' },
-  eyeButton: { position: 'absolute', right: '12px', background: 'none', border: 'none', cursor: 'pointer', color: '#999' },
-  button: { padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s', display: 'flex', justifyContent: 'center' },
-  errorBanner: { padding: '10px', backgroundColor: '#ffebee', color: '#c62828', borderRadius: '6px', fontSize: '14px', textAlign: 'center' },
-  registerLink: { marginTop: '20px', textAlign: 'center', color: '#666', fontSize: '14px', cursor: 'pointer' },
-  linkText: { color: '#007bff', fontWeight: '600' }
+  container: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    backgroundColor: "#f4f7f6",
+  },
+  card: {
+    padding: "40px",
+    backgroundColor: "#fff",
+    borderRadius: "12px",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+    width: "100%",
+    maxWidth: "400px",
+  },
+  title: {
+    margin: "0 0 8px",
+    fontSize: "24px",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  subtitle: {
+    margin: "0 0 24px",
+    color: "#666",
+    textAlign: "center",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+  inputGroup: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  icon: {
+    position: "absolute",
+    left: "12px",
+    color: "#999",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 12px 12px 40px",
+    borderRadius: "8px",
+    border: "1px solid #ddd",
+    fontSize: "16px",
+    outline: "none",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: "12px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    color: "#999",
+  },
+  button: {
+    padding: "12px",
+    backgroundColor: "#007bff",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "16px",
+    fontWeight: "600",
+    cursor: "pointer",
+    display: "flex",
+    justifyContent: "center",
+  },
+  errorBanner: {
+    padding: "10px",
+    backgroundColor: "#ffebee",
+    color: "#c62828",
+    borderRadius: "6px",
+    fontSize: "14px",
+    textAlign: "center",
+  },
+  registerLink: {
+    marginTop: "20px",
+    textAlign: "center",
+    color: "#666",
+    fontSize: "14px",
+    cursor: "pointer",
+  },
+  linkText: {
+    color: "#007bff",
+    fontWeight: "600",
+  },
 };
 
 export default Login;

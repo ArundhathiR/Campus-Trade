@@ -1,15 +1,11 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import "./Navbar.css";
 
 const Navbar = () => {
 
-  const token = localStorage.getItem("token");
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
+  const { user, logout } = useContext(AuthContext);
 
   return (
     <nav className="navbar">
@@ -24,24 +20,27 @@ const Navbar = () => {
           <Link to="/">Home</Link>
         </li>
 
-        {token && (
+        {user && (
           <li>
             <Link to="/seller">Seller Dashboard</Link>
           </li>
         )}
 
-        {!token ? (
+        {!user ? (
           <li>
             <Link to="/login">Login</Link>
           </li>
         ) : (
           <li>
-            <button className="logout-btn" onClick={handleLogout}>
+            <button className="logout-btn" onClick={logout}>
               Logout
             </button>
           </li>
         )}
-        <Link to="/cart">Cart</Link>
+
+        <li>
+          <Link to="/cart">Cart</Link>
+        </li>
 
       </ul>
 
