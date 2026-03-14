@@ -12,18 +12,21 @@ function Cart() {
   const shipping = subtotal > 500 ? 0 : 40;
   const total = subtotal + shipping;
 
-  const formatINR = (num) => new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(num);
+  const formatINR = (num) =>
+    new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(num);
 
   if (cart.length === 0) {
     return (
       <div className="cart-empty">
         <ShoppingBag size={64} color="#ccc" />
         <h2>Your cart is empty</h2>
-        <button onClick={() => navigate("/")} className="shop-now-btn">Shop Now</button>
+        <button onClick={() => navigate("/")} className="shop-now-btn">
+          Shop Now
+        </button>
       </div>
     );
   }
@@ -32,31 +35,46 @@ function Cart() {
     <div className="cart-page">
       <div className="cart-container">
         <h2 className="cart-title">Your Shopping Cart</h2>
-        
+
         <div className="cart-layout">
+
           {/* List of items */}
           <div className="cart-items">
             {cart.map((item) => (
               <div className="cart-item-card" key={item._id}>
+
                 <div className="cart-img-wrapper">
-                  <img 
-                    src={item.image ? `http://localhost:5000/${item.image}` : "https://via.placeholder.com/100"} 
-                    alt={item.title} 
+                  <img
+                    src={
+                      item.image
+                        ? `http://localhost:5000/${item.image}`
+                        : "https://via.placeholder.com/100"
+                    }
+                    alt={item.title}
                   />
                 </div>
-                
+
                 <div className="cart-item-info">
                   <h3>{item.title}</h3>
                   <p className="unit-price">{formatINR(item.price)}</p>
-                  
+
                   <div className="cart-item-actions">
                     <div className="qty-selector">
-                      <button onClick={() => decreaseQty(item._id)}><Minus size={14} /></button>
+                      <button onClick={() => decreaseQty(item._id)}>
+                        <Minus size={14} />
+                      </button>
+
                       <span>{item.quantity}</span>
-                      <button onClick={() => increaseQty(item._id)}><Plus size={14} /></button>
+
+                      <button onClick={() => increaseQty(item._id)}>
+                        <Plus size={14} />
+                      </button>
                     </div>
-                    
-                    <button className="remove-icon-btn" onClick={() => removeFromCart(item._id)}>
+
+                    <button
+                      className="remove-icon-btn"
+                      onClick={() => removeFromCart(item._id)}
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -72,21 +90,30 @@ function Cart() {
           {/* Checkout Summary */}
           <div className="cart-summary">
             <h3>Order Summary</h3>
+
             <div className="summary-line">
               <span>Subtotal</span>
               <span>{formatINR(subtotal)}</span>
             </div>
+
             <div className="summary-line">
               <span>Shipping</span>
               <span>{shipping === 0 ? "FREE" : formatINR(shipping)}</span>
             </div>
+
             <div className="summary-line total">
               <span>Total</span>
               <span>{formatINR(total)}</span>
             </div>
-            <button className="checkout-btn">
+
+            {/* UPDATED BUTTON */}
+            <button
+              className="checkout-btn"
+              onClick={() => navigate("/checkout")}
+            >
               Proceed to Checkout <ArrowRight size={18} />
             </button>
+
           </div>
         </div>
       </div>
