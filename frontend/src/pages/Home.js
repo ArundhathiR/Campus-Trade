@@ -8,6 +8,13 @@ function Home() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
+  const [cart, setCart] = useState([]);
+  const addToCart = (product) => {
+  const updatedCart = [...cart, product];
+  setCart(updatedCart);
+
+  console.log("Cart:", updatedCart);
+};
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/products")
@@ -55,7 +62,10 @@ function Home() {
     category ? product.category === category : true
   )
           .map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product._id} 
+                        product={product}
+                        addToCart={addToCart}
+            />
           ))
         }
 

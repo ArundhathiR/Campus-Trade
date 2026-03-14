@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import "./ProductDetails.css";
-
+import { useContext } from "react";
+import { CartContext } from "../context/CartContext";
 function ProductDetails() {
 
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     axios
@@ -29,6 +31,11 @@ function ProductDetails() {
   const imageUrl = product.image
     ? `http://localhost:5000/${product.image}`
     : "https://via.placeholder.com/400";
+  
+    const handleAddToCart = () => {
+  addToCart(product);
+  alert("Product added to cart!");
+};
 
   return (
     <div className="product-details-container">
@@ -57,7 +64,8 @@ function ProductDetails() {
           ₹{product.price}
         </h2>
 
-        <button className="add-to-cart-btn">
+        
+        <button className="add-to-cart-btn" onClick={handleAddToCart}>
           Add to Cart
         </button>
 
