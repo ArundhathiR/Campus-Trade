@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import ProductCard from "../components/ProductCard";
+import { CartContext } from "../context/CartContext";
 import "./Home.css";
 
 function Home() {
@@ -8,18 +9,36 @@ function Home() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("");
-  const [cart, setCart] = useState([]);
-  const addToCart = (product) => {
-  const updatedCart = [...cart, product];
-  setCart(updatedCart);
 
-  console.log("Cart:", updatedCart);
-};
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/products")
-      .then(res => setProducts(res.data))
-      .catch(err => console.log(err));
+
+    const fetchProducts = async () => {
+
+      try {
+
+        const res = await axios.get(
+          `http://localhost:5000/api/products?t=${Date.now()}`,
+          {
+            headers: {
+              "Cache-Control": "no-cache"
+            }
+          }
+        );
+
+        console.log("All products:", res.data);
+
+        setProducts(res.data);
+
+      } catch (error) {
+        console.log(error);
+      }
+
+    };
+
+    fetchProducts();
+
   }, []);
 
   return (
@@ -27,7 +46,6 @@ function Home() {
 
       <h1 className="text-center mt-20">Campus Trade Products</h1>
 
-      {/* SEARCH BAR */}
       <input
         type="text"
         placeholder="Search products..."
@@ -40,34 +58,34 @@ function Home() {
           display: "block"
         }}
       />
-      <select
-  value={category}
-  onChange={(e) => setCategory(e.target.value)}
-  style={{marginLeft:"20px", padding:"10px"}}
->
-  <option value="">All Categories</option>
-  <option value="Books">Books</option>
-  <option value="Electronics">Electronics</option>
-  <option value="Lab Gear">Lab Gear</option>
-</select>
 
-      {/* PRODUCT GRID */}
+      <select
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        style={{ marginLeft: "20px", padding: "10px" }}
+      >
+        <option value="">All Categories</option>
+        <option value="Books">Books</option>
+        <option value="Electronics">Electronics</option>
+        <option value="Lab Gear">Lab Gear</option>
+      </select>
+
       <div className="product-grid">
 
         {products
           .filter((product) =>
             product.title.toLowerCase().includes(search.toLowerCase())
           )
-          .filter(product =>
-    category ? product.category === category : true
-  )
+          .filter((product) =>
+            category ? product.category === category : true
+          )
           .map((product) => (
-            <ProductCard key={product._id} 
-                        product={product}
-                        addToCart={addToCart}
+            <ProductCard
+              key={product._id}
+              product={product}
+              addToCart={addToCart}
             />
-          ))
-        }
+          ))}
 
       </div>
 
