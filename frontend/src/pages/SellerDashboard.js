@@ -11,6 +11,7 @@ const SellerDashboard = () => {
     category: "",
     image: null
   });
+  const [preview, setPreview] = useState(null);
 
   // 2. Handle text input changes
   const handleChange = (e) => {
@@ -19,8 +20,16 @@ const SellerDashboard = () => {
 
   // 3. Handle image selection
   const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
-  };
+
+  const file = e.target.files[0];
+
+  setFormData({ ...formData, image: file });
+
+  if (file) {
+    setPreview(URL.createObjectURL(file));
+  }
+
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -121,6 +130,17 @@ const SellerDashboard = () => {
                 onChange={handleFileChange}
                 accept="image/*"
               />
+              {preview && (
+                <img
+                src={preview}
+                alt="Preview"
+                style={{
+                width: "200px",
+                marginTop: "10px",
+                borderRadius: "8px"
+                }}
+              />
+)}
             </label>
           </div>
 

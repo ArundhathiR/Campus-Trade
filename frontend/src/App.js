@@ -9,6 +9,7 @@ import ProductDetails from "./pages/ProductDetails";
 import MyProducts from "./pages/MyProducts";
 import Login from "./pages/Login";
 import Register from "./pages/Register"; // 1. Added this import
+import Cart from "./pages/Cart";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
         <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/my-products" element={<MyProducts />} />
         <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </Router>
   );

@@ -41,6 +41,7 @@ const Navbar = () => {
             </button>
           </li>
         )}
+        <Link to="/cart">Cart</Link>
 
       </ul>
 
