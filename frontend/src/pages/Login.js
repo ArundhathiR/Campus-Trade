@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import { CartContext } from "../context/CartContext"; // ✅ add this
 
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "http://localhost:5000/api";
@@ -10,7 +11,8 @@ const API_BASE_URL =
 function Login() {
   const navigate = useNavigate();
 
-  const { login } = useContext(AuthContext); // ✅ get login from context
+  const { login } = useContext(AuthContext);
+  const { loadCart } = useContext(CartContext); // ✅ get loadCart
 
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -43,18 +45,21 @@ function Login() {
 
       const { token, user } = response.data;
 
-      // ✅ update auth context
       login(user, token);
 
-      // ✅ redirect instantly
+      // ✅ Load user's cart instantly
+      loadCart(user._id);
+
       navigate("/seller");
 
     } catch (err) {
+
       const message =
         err.response?.data?.message ||
         "Invalid credentials. Please try again.";
 
       setError(message);
+
     } finally {
       setIsLoading(false);
     }

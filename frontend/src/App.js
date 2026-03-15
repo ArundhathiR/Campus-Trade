@@ -1,5 +1,5 @@
 import "./App.css";
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -13,7 +13,22 @@ import Register from "./pages/Register";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 
+import { CartContext } from "./context/CartContext";
+import { AuthContext } from "./context/AuthContext";
+
 function App() {
+
+  const { user } = useContext(AuthContext);
+  const { loadCart } = useContext(CartContext);
+
+  useEffect(() => {
+
+    if (user && user._id) {
+      loadCart(user._id);
+    }
+
+  }, [user, loadCart]);
+
   return (
     <Router>
 
@@ -22,21 +37,16 @@ function App() {
 
       <Routes>
 
-        {/* Home Page */}
         <Route path="/" element={<Home />} />
 
-        {/* Authentication */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Seller Pages */}
         <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/my-products" element={<MyProducts />} />
 
-        {/* Product Page */}
         <Route path="/product/:id" element={<ProductDetails />} />
 
-        {/* Cart & Checkout */}
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
 

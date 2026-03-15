@@ -1,12 +1,24 @@
-import React, { useContext } from "react";
+
+import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
+import { AuthContext } from "../context/AuthContext";   // ✅ add this
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import "./Cart.css";
 
 function Cart() {
-  const { cart, removeFromCart, increaseQty, decreaseQty } = useContext(CartContext);
+
+  const { cart, removeFromCart, increaseQty, decreaseQty, loadCart } = useContext(CartContext);
+  const { user } = useContext(AuthContext);   // ✅ add this
+
   const navigate = useNavigate();
+
+  // ✅ reload cart after refresh
+  useEffect(() => {
+    if (user && user._id) {
+      loadCart(user._id);
+    }
+  }, [user, loadCart]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 500 ? 0 : 40;
