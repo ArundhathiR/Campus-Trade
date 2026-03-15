@@ -6,10 +6,11 @@ export const CartProvider = ({ children }) => {
 
   const [cart, setCart] = useState([]);
 
-  const getUserId = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    return user?._id;
-  };
+ const getUserId = () => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  return user?.id;
+};
+
 
   const loadCart = (userId) => {
 
@@ -22,29 +23,43 @@ export const CartProvider = ({ children }) => {
     } else {
       setCart([]);
     }
+
   };
 
   useEffect(() => {
-
+  const checkUserAndLoadCart = () => {
     const userId = getUserId();
 
     if (userId) {
+      console.log("Loading cart for user:", userId);
       loadCart(userId);
     }
+  };
 
-  }, []);
+  checkUserAndLoadCart();
+
+  // listen for login changes
+  window.addEventListener("storage", checkUserAndLoadCart);
+
+  return () => {
+    window.removeEventListener("storage", checkUserAndLoadCart);
+  };
+}, []);
+  
 
   const saveCart = (updatedCart) => {
 
-    const userId = getUserId();
+  const userId = getUserId();
 
-    if (!userId) return;
+  console.log("Saving cart for user:", userId); // DEBUG
 
-    localStorage.setItem(
-      `cart_${userId}`,
-      JSON.stringify(updatedCart)
-    );
-  };
+  if (!userId) return;
+
+  localStorage.setItem(
+    `cart_${userId}`,
+    JSON.stringify(updatedCart)
+  );
+};
 
   const addToCart = (product) => {
 
@@ -118,6 +133,13 @@ export const CartProvider = ({ children }) => {
   };
 
   const clearCart = () => {
+
+    const userId = getUserId();
+
+    if (userId) {
+      localStorage.removeItem(`cart_${userId}`);
+    }
+
     setCart([]);
   };
 

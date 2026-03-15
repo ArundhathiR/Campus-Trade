@@ -6,9 +6,11 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 console.log("JWT SECRET:", process.env.JWT_SECRET);
-require("dotenv").config();
 
 const app = express();
+const cartRoutes = require("./routes/cartRoutes");
+
+app.use("/api/cart", cartRoutes);
 
 app.use(cors());
 app.use(express.json());
