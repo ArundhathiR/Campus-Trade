@@ -23,7 +23,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 
 // serve uploaded images
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 const PORT = process.env.PORT || 5000;
 

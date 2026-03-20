@@ -1,19 +1,39 @@
 const Product = require("../models/productModel");
 
+const cloudinary = require("../config/cloudinary");
+
 // 1. CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
+
     const { title, description, price, category } = req.body;
+
+    let imageUrl = "";
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(
+        `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+        {
+          folder: "products"
+        }
+      );
+
+      imageUrl = result.secure_url;
+    }
+
     const product = new Product({
       title,
       description,
       price,
       category,
-      image: req.file ? `uploads/${req.file.filename}` : "",
+      image: imageUrl,
       sellerId: req.user.id
     });
+
     const savedProduct = await product.save();
+
     res.status(201).json(savedProduct);
+
   } catch (error) {
     console.error("Database Save Error:", error.message);
     res.status(500).json({ message: error.message });
