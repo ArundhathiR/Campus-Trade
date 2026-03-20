@@ -29,7 +29,7 @@ function ProductDetails() {
   if (!product) return <p className="error">Product not found</p>;
 
   const imageUrl = product.image
-    ? `http://localhost:5000/${product.image}`
+    ? product.image
     : "https://via.placeholder.com/400";
   
     const handleAddToCart = () => {
