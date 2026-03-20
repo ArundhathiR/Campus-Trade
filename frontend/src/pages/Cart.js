@@ -59,7 +59,7 @@ function Cart() {
                   <img
                     src={
                       item.image
-                        ? `http://localhost:5000/${item.image}`
+                        ? item.image
                         : "https://via.placeholder.com/100"
                     }
                     alt={item.title}

@@ -6,7 +6,7 @@ const ProductCard = ({ product }) => {
   if (!product) return null;
 
   const imageUrl = product.image
-    ? `http://localhost:5000/${product.image}`
+    ? product.image
     : "https://via.placeholder.com/300x200?text=No+Image";
 
   return (

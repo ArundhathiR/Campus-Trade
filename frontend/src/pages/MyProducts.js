@@ -80,7 +80,7 @@ function MyProducts({ refreshTrigger }) {
             }}
           >
             <img
-              src={`http://localhost:5000/${product.image}`}
+              src={product.image}
               alt={product.title}
               width="80"
               height="80"
