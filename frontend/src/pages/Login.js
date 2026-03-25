@@ -38,28 +38,23 @@ function Login() {
     setError("");
 
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/auth/login`,
-        formData
-      );
+      const response = await axios.post(`${API_BASE_URL}/auth/login`, formData);
 
       const { token, user } = response.data;
 
       login(user, token);
 
       // ✅ Load user's cart instantly
-      loadCart(user._id);
+      if (user._id) {
+        loadCart(user._id);
+      }
 
       navigate("/seller");
-
     } catch (err) {
-
       const message =
-        err.response?.data?.message ||
-        "Invalid credentials. Please try again.";
+        err.response?.data?.message || "Invalid credentials. Please try again.";
 
       setError(message);
-
     } finally {
       setIsLoading(false);
     }
@@ -122,10 +117,7 @@ function Login() {
           </button>
         </form>
 
-        <p
-          onClick={() => navigate("/register")}
-          style={styles.registerLink}
-        >
+        <p onClick={() => navigate("/register")} style={styles.registerLink}>
           Don't have an account?{" "}
           <span style={styles.linkText}>Register here.</span>
         </p>

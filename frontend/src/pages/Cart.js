@@ -1,26 +1,31 @@
-
 import React, { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import { AuthContext } from "../context/AuthContext";   // ✅ add this
+import { AuthContext } from "../context/AuthContext";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight } from "lucide-react";
 import "./Cart.css";
 
 function Cart() {
-
-  const { cart, removeFromCart, increaseQty, decreaseQty, loadCart } = useContext(CartContext);
-  const { user } = useContext(AuthContext);   // ✅ add this
+  const { cart, removeFromCart, increaseQty, decreaseQty, loadCart } =
+    useContext(CartContext);
+  const { user } = useContext(AuthContext);
 
   const navigate = useNavigate();
 
-  // ✅ reload cart after refresh
+  // Reload cart when user logs in
   useEffect(() => {
     if (user && user._id) {
       loadCart(user._id);
     }
   }, [user, loadCart]);
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  // Calculate totals from cart.items (which come from backend)
+  const items = cart?.items || [];
+  const subtotal = items.reduce((sum, item) => {
+    const product = item.productId;
+    return sum + (product?.price || 0) * item.quantity;
+  }, 0);
+
   const shipping = subtotal > 500 ? 0 : 40;
   const total = subtotal + shipping;
 
@@ -31,7 +36,7 @@ function Cart() {
       maximumFractionDigits: 0,
     }).format(num);
 
-  if (cart.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="cart-empty">
         <ShoppingBag size={64} color="#ccc" />
@@ -49,54 +54,59 @@ function Cart() {
         <h2 className="cart-title">Your Shopping Cart</h2>
 
         <div className="cart-layout">
-
           {/* List of items */}
           <div className="cart-items">
-            {cart.map((item) => (
-              <div className="cart-item-card" key={item._id}>
+            {items.map((item) => {
+              const product = item.productId;
+              const productId = product?._id || product?.id;
 
-                <div className="cart-img-wrapper">
-                  <img
-                    src={
-                      item.image
-                        ? item.image
-                        : "https://via.placeholder.com/100"
-                    }
-                    alt={item.title}
-                  />
-                </div>
+              return (
+                <div className="cart-item-card" key={productId}>
+                  <div className="cart-img-wrapper">
+                    <img
+                      src={
+                        product?.image
+                          ? product.image
+                          : "https://via.placeholder.com/100"
+                      }
+                      alt={product?.title || "Product"}
+                    />
+                  </div>
 
-                <div className="cart-item-info">
-                  <h3>{item.title}</h3>
-                  <p className="unit-price">{formatINR(item.price)}</p>
+                  <div className="cart-item-info">
+                    <h3>{product?.title}</h3>
+                    <p className="unit-price">
+                      {formatINR(product?.price || 0)}
+                    </p>
 
-                  <div className="cart-item-actions">
-                    <div className="qty-selector">
-                      <button onClick={() => decreaseQty(item._id)}>
-                        <Minus size={14} />
-                      </button>
+                    <div className="cart-item-actions">
+                      <div className="qty-selector">
+                        <button onClick={() => decreaseQty(productId)}>
+                          <Minus size={14} />
+                        </button>
 
-                      <span>{item.quantity}</span>
+                        <span>{item.quantity}</span>
 
-                      <button onClick={() => increaseQty(item._id)}>
-                        <Plus size={14} />
+                        <button onClick={() => increaseQty(productId)}>
+                          <Plus size={14} />
+                        </button>
+                      </div>
+
+                      <button
+                        className="remove-icon-btn"
+                        onClick={() => removeFromCart(productId)}
+                      >
+                        <Trash2 size={18} />
                       </button>
                     </div>
+                  </div>
 
-                    <button
-                      className="remove-icon-btn"
-                      onClick={() => removeFromCart(item._id)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                  <div className="cart-item-final-price">
+                    {formatINR((product?.price || 0) * item.quantity)}
                   </div>
                 </div>
-
-                <div className="cart-item-final-price">
-                  {formatINR(item.price * item.quantity)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Checkout Summary */}
@@ -118,14 +128,13 @@ function Cart() {
               <span>{formatINR(total)}</span>
             </div>
 
-            {/* UPDATED BUTTON */}
+            {/* CHECKOUT BUTTON */}
             <button
               className="checkout-btn"
               onClick={() => navigate("/checkout")}
             >
               Proceed to Checkout <ArrowRight size={18} />
             </button>
-
           </div>
         </div>
       </div>

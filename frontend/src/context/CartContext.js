@@ -2,145 +2,260 @@ import { createContext, useState, useEffect } from "react";
 
 export const CartContext = createContext();
 
+const API_BASE_URL =
+  process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+const API_URL = `${API_BASE_URL}/cart`;
+
 export const CartProvider = ({ children }) => {
+  const [cart, setCart] = useState({ items: [] });
+  const [loading, setLoading] = useState(false);
 
-  const [cart, setCart] = useState([]);
+  // Get token from localStorage
+  const getToken = () => localStorage.getItem("token");
 
- const getUserId = () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  return user?.id;
-};
-
-
-  const loadCart = (userId) => {
-
-    if (!userId) return;
-
-    const storedCart = localStorage.getItem(`cart_${userId}`);
-
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    } else {
-      setCart([]);
-    }
-
+  // Get userId from localStorage
+  const getUserId = () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?._id || user?.id;
+    return userId;
   };
 
-  useEffect(() => {
-  const checkUserAndLoadCart = () => {
+  // Fetch cart from backend
+  const fetchCartFromBackend = async () => {
     const userId = getUserId();
+    const token = getToken();
 
+    if (!userId || !token) {
+      setCart({ items: [] });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(API_URL, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data || { items: [] });
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to fetch cart:", response.status, errorText);
+        setCart({ items: [] });
+      }
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      setCart({ items: [] });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load cart when component mounts or user logs in
+  useEffect(() => {
+    const userId = getUserId();
     if (userId) {
-      console.log("Loading cart for user:", userId);
-      loadCart(userId);
-    }
-  };
-
-  checkUserAndLoadCart();
-
-  // listen for login changes
-  window.addEventListener("storage", checkUserAndLoadCart);
-
-  return () => {
-    window.removeEventListener("storage", checkUserAndLoadCart);
-  };
-}, []);
-  
-
-  const saveCart = (updatedCart) => {
-
-  const userId = getUserId();
-
-  console.log("Saving cart for user:", userId); // DEBUG
-
-  if (!userId) return;
-
-  localStorage.setItem(
-    `cart_${userId}`,
-    JSON.stringify(updatedCart)
-  );
-};
-
-  const addToCart = (product) => {
-
-    const existing = cart.find(item => item._id === product._id);
-
-    let updatedCart;
-
-    if (existing) {
-
-      updatedCart = cart.map(item =>
-        item._id === product._id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-
+      fetchCartFromBackend();
     } else {
+      setCart({ items: [] });
+    }
+  }, []);
 
-      updatedCart = [
-        ...cart,
-        { ...product, quantity: 1 }
-      ];
+  // Listen for storage changes (login/logout)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userId = getUserId();
+      if (userId) {
+        fetchCartFromBackend();
+      } else {
+        setCart({ items: [] });
+      }
+    };
 
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const addToCart = async (product) => {
+    const token = getToken();
+
+    if (!token) {
+      console.error("User not logged in - no token found");
+      return false;
     }
 
-    setCart(updatedCart);
-    saveCart(updatedCart);
+    if (!product || !product._id) {
+      console.error("Invalid product - missing _id");
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/add`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId: product._id }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Product added to cart successfully", data);
+        setCart(data);
+        return true;
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to add to cart:", response.status, errorText);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      return false;
+    }
   };
 
-  const removeFromCart = (id) => {
+  const removeFromCart = async (productId) => {
+    const token = getToken();
 
-    const updatedCart = cart.filter(item => item._id !== id);
+    if (!token) {
+      console.error("User not logged in");
+      return;
+    }
 
-    setCart(updatedCart);
-    saveCart(updatedCart);
+    try {
+      const response = await fetch(`${API_URL}/remove`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ productId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data);
+      } else {
+        console.error("Failed to remove from cart:", response.status);
+      }
+    } catch (error) {
+      console.error("Error removing from cart:", error);
+    }
   };
 
-  const increaseQty = (id) => {
+  const increaseQty = async (productId) => {
+    const token = getToken();
 
-    const updatedCart = cart.map(item =>
-      item._id === id
-        ? { ...item, quantity: item.quantity + 1 }
-        : item
+    if (!token) {
+      console.error("User not logged in");
+      return;
+    }
+
+    const item = cart.items.find(
+      (i) => i.productId._id === productId || i.productId === productId,
     );
 
-    setCart(updatedCart);
-    saveCart(updatedCart);
+    if (!item) return;
+
+    try {
+      const response = await fetch(`${API_URL}/update-quantity`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          quantity: item.quantity + 1,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data);
+      } else {
+        console.error("Failed to update quantity:", response.status);
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
   };
 
-  const decreaseQty = (id) => {
+  const decreaseQty = async (productId) => {
+    const token = getToken();
 
-    const item = cart.find(i => i._id === id);
-
-    let updatedCart;
-
-    if (item.quantity === 1) {
-
-      updatedCart = cart.filter(i => i._id !== id);
-
-    } else {
-
-      updatedCart = cart.map(i =>
-        i._id === id
-          ? { ...i, quantity: i.quantity - 1 }
-          : i
-      );
-
+    if (!token) {
+      console.error("User not logged in");
+      return;
     }
 
-    setCart(updatedCart);
-    saveCart(updatedCart);
+    const item = cart.items.find(
+      (i) => i.productId._id === productId || i.productId === productId,
+    );
+
+    if (!item) return;
+
+    try {
+      const response = await fetch(`${API_URL}/update-quantity`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          productId,
+          quantity: item.quantity - 1,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data);
+      } else {
+        console.error("Failed to update quantity:", response.status);
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+    }
   };
 
-  const clearCart = () => {
+  const clearCart = async () => {
+    const token = getToken();
 
-    const userId = getUserId();
-
-    if (userId) {
-      localStorage.removeItem(`cart_${userId}`);
+    if (!token) {
+      console.error("User not logged in");
+      return;
     }
 
-    setCart([]);
+    try {
+      const response = await fetch(`${API_URL}/clear`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCart(data);
+      } else {
+        console.error("Failed to clear cart:", response.status);
+      }
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  };
+
+  const loadCart = async (userId) => {
+    // Reload cart from backend - useful after login
+    await fetchCartFromBackend();
   };
 
   return (
@@ -152,7 +267,8 @@ export const CartProvider = ({ children }) => {
         increaseQty,
         decreaseQty,
         clearCart,
-        loadCart
+        loadCart,
+        loading,
       }}
     >
       {children}

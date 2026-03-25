@@ -5,7 +5,6 @@ import "./ProductDetails.css";
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 function ProductDetails() {
-
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -31,15 +30,18 @@ function ProductDetails() {
   const imageUrl = product.image
     ? product.image
     : "https://via.placeholder.com/400";
-  
-    const handleAddToCart = () => {
-  addToCart(product);
-  alert("Product added to cart!");
-};
+
+  const handleAddToCart = async () => {
+    const success = await addToCart(product);
+    if (success) {
+      alert("Product added to cart successfully!");
+    } else {
+      alert("Failed to add product to cart. Please try again.");
+    }
+  };
 
   return (
     <div className="product-details-container">
-
       <div className="product-image-section">
         <img
           src={imageUrl}
@@ -49,28 +51,18 @@ function ProductDetails() {
       </div>
 
       <div className="product-info-section">
-
         <h1 className="product-details-title">{product.title}</h1>
 
-        <p className="product-details-category">
-          Category: {product.category}
-        </p>
+        <p className="product-details-category">Category: {product.category}</p>
 
-        <p className="product-details-description">
-          {product.description}
-        </p>
+        <p className="product-details-description">{product.description}</p>
 
-        <h2 className="product-details-price">
-          ₹{product.price}
-        </h2>
+        <h2 className="product-details-price">₹{product.price}</h2>
 
-        
         <button className="add-to-cart-btn" onClick={handleAddToCart}>
           Add to Cart
         </button>
-
       </div>
-
     </div>
   );
 }
