@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 
 export const CartContext = createContext();
 
@@ -10,18 +10,14 @@ export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState({ items: [] });
   const [loading, setLoading] = useState(false);
 
-  // Get token from localStorage
   const getToken = () => localStorage.getItem("token");
 
-  // Get userId from localStorage
   const getUserId = () => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?._id || user?.id;
-    return userId;
+    return user?._id || user?.id;
   };
 
-  // Fetch cart from backend
-  const fetchCartFromBackend = async () => {
+  const fetchCartFromBackend = useCallback(async () => {
     const userId = getUserId();
     const token = getToken();
 
@@ -54,19 +50,12 @@ export const CartProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Load cart when component mounts or user logs in
-  useEffect(() => {
-    const userId = getUserId();
-    if (userId) {
-      fetchCartFromBackend();
-    } else {
-      setCart({ items: [] });
-    }
   }, []);
 
-  // Listen for storage changes (login/logout)
+  useEffect(() => {
+    fetchCartFromBackend();
+  }, [fetchCartFromBackend]);
+
   useEffect(() => {
     const handleStorageChange = () => {
       const userId = getUserId();
@@ -79,7 +68,7 @@ export const CartProvider = ({ children }) => {
 
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  }, [fetchCartFromBackend]);
 
   const addToCart = async (product) => {
     const token = getToken();
@@ -106,14 +95,13 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Product added to cart successfully", data);
         setCart(data);
         return true;
-      } else {
-        const errorText = await response.text();
-        console.error("Failed to add to cart:", response.status, errorText);
-        return false;
       }
+
+      const errorText = await response.text();
+      console.error("Failed to add to cart:", response.status, errorText);
+      return false;
     } catch (error) {
       console.error("Error adding to cart:", error);
       return false;
@@ -122,11 +110,7 @@ export const CartProvider = ({ children }) => {
 
   const removeFromCart = async (productId) => {
     const token = getToken();
-
-    if (!token) {
-      console.error("User not logged in");
-      return;
-    }
+    if (!token) return;
 
     try {
       const response = await fetch(`${API_URL}/remove`, {
@@ -151,14 +135,10 @@ export const CartProvider = ({ children }) => {
 
   const increaseQty = async (productId) => {
     const token = getToken();
-
-    if (!token) {
-      console.error("User not logged in");
-      return;
-    }
+    if (!token) return;
 
     const item = cart.items.find(
-      (i) => i.productId._id === productId || i.productId === productId,
+      (i) => i.productId?._id === productId || i.productId === productId
     );
 
     if (!item) return;
@@ -189,14 +169,10 @@ export const CartProvider = ({ children }) => {
 
   const decreaseQty = async (productId) => {
     const token = getToken();
-
-    if (!token) {
-      console.error("User not logged in");
-      return;
-    }
+    if (!token) return;
 
     const item = cart.items.find(
-      (i) => i.productId._id === productId || i.productId === productId,
+      (i) => i.productId?._id === productId || i.productId === productId
     );
 
     if (!item) return;
@@ -227,11 +203,7 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = async () => {
     const token = getToken();
-
-    if (!token) {
-      console.error("User not logged in");
-      return;
-    }
+    if (!token) return;
 
     try {
       const response = await fetch(`${API_URL}/clear`, {
@@ -253,8 +225,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  const loadCart = async (userId) => {
-    // Reload cart from backend - useful after login
+  const loadCart = async () => {
     await fetchCartFromBackend();
   };
 
