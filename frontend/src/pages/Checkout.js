@@ -1,12 +1,17 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
-import { CreditCard, Truck, ShieldCheck, ArrowLeft, CheckCircle2 } from "lucide-react";
+import {
+  CreditCard,
+  Truck,
+  ShieldCheck,
+  ArrowLeft,
+  CheckCircle2,
+} from "lucide-react";
 import "./Checkout.css";
 
 function Checkout() {
-
-  const { cart, setCart } = useContext(CartContext);
+  const { cart, clearCart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const [step, setStep] = useState(1);
@@ -18,7 +23,7 @@ function Checkout() {
     zipCode: "",
     cardNumber: "",
     expDate: "",
-    cvv: ""
+    cvv: "",
   });
 
   const handleInputChange = (e) => {
@@ -34,11 +39,14 @@ function Checkout() {
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
+  // Get items from cart (backend returns { items: [...] })
+  const items = cart?.items || [];
+
   // Calculate totals
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const subtotal = items.reduce((sum, item) => {
+    const product = item.productId;
+    return sum + (product?.price || 0) * item.quantity;
+  }, 0);
 
   const shipping = subtotal > 500 ? 0 : 40;
   const grandTotal = subtotal + shipping;
@@ -46,10 +54,9 @@ function Checkout() {
   // Clear cart when order succeeds
   useEffect(() => {
     if (step === 3) {
-      setCart([]);
-      localStorage.removeItem("cart");
+      clearCart();
     }
-  }, [step, setCart]);
+  }, [step, clearCart]);
 
   // SUCCESS PAGE
   if (step === 3) {
@@ -57,12 +64,9 @@ function Checkout() {
       <div className="checkout-success">
         <CheckCircle2 size={80} color="#22c55e" />
         <h1>Order Confirmed!</h1>
-        <p>Your order for {cart.length} items is being processed.</p>
+        <p>Your order for {items.length} items is being processed.</p>
 
-        <button
-          onClick={() => navigate("/")}
-          className="primary-btn"
-        >
+        <button onClick={() => navigate("/")} className="primary-btn">
           Back to Home
         </button>
       </div>
@@ -72,22 +76,15 @@ function Checkout() {
   return (
     <div className="checkout-page">
       <div className="checkout-container">
-
         {/* Step Indicator */}
         <div className="checkout-stepper">
-          <div className={`step ${step >= 1 ? "active" : ""}`}>
-            1. Shipping
-          </div>
-          <div className={`step ${step >= 2 ? "active" : ""}`}>
-            2. Payment
-          </div>
+          <div className={`step ${step >= 1 ? "active" : ""}`}>1. Shipping</div>
+          <div className={`step ${step >= 2 ? "active" : ""}`}>2. Payment</div>
         </div>
 
         <div className="checkout-layout">
-
           {/* LEFT SIDE FORM */}
           <div className="checkout-form-section">
-
             <button
               onClick={goBack}
               disabled={step === 1}
@@ -97,11 +94,9 @@ function Checkout() {
             </button>
 
             {step === 1 ? (
-
               <form onSubmit={nextStep} className="checkout-form">
-
                 <h3>
-                  <Truck size={20}/> Shipping Information
+                  <Truck size={20} /> Shipping Information
                 </h3>
 
                 <input
@@ -121,7 +116,6 @@ function Checkout() {
                 />
 
                 <div className="form-row">
-
                   <input
                     type="text"
                     name="city"
@@ -137,28 +131,20 @@ function Checkout() {
                     required
                     onChange={handleInputChange}
                   />
-
                 </div>
 
-                <button
-                  type="submit"
-                  className="next-btn"
-                >
+                <button type="submit" className="next-btn">
                   Continue to Payment
                 </button>
-
               </form>
-
             ) : (
-
               <form onSubmit={nextStep} className="checkout-form">
-
                 <h3>
-                  <CreditCard size={20}/> Payment Details
+                  <CreditCard size={20} /> Payment Details
                 </h3>
 
                 <div className="payment-secure-badge">
-                  <ShieldCheck size={16}/> Secure SSL Encrypted
+                  <ShieldCheck size={16} /> Secure SSL Encrypted
                 </div>
 
                 <input
@@ -170,7 +156,6 @@ function Checkout() {
                 />
 
                 <div className="form-row">
-
                   <input
                     type="text"
                     name="expDate"
@@ -187,49 +172,39 @@ function Checkout() {
                     required
                     onChange={handleInputChange}
                   />
-
                 </div>
 
-                <button
-                  type="submit"
-                  className="next-btn"
-                >
+                <button type="submit" className="next-btn">
                   Place Order — ₹{grandTotal}
                 </button>
-
               </form>
-
             )}
-
           </div>
 
           {/* RIGHT SIDE SUMMARY */}
           <div className="checkout-summary">
-
             <h4>In Your Cart</h4>
 
             <div className="summary-items">
+              {items.map((item) => {
+                const product = item.productId;
+                const productId = product?._id || product?.id;
 
-              {cart.map((item) => (
-                <div key={item._id} className="summary-item">
+                return (
+                  <div key={productId} className="summary-item">
+                    <span>
+                      {product?.title} (x{item.quantity})
+                    </span>
 
-                  <span>
-                    {item.title} (x{item.quantity})
-                  </span>
-
-                  <span>
-                    ₹{item.price * item.quantity}
-                  </span>
-
-                </div>
-              ))}
-
+                    <span>₹{(product?.price || 0) * item.quantity}</span>
+                  </div>
+                );
+              })}
             </div>
 
-            <hr/>
+            <hr />
 
             <div className="summary-totals">
-
               <div className="total-row">
                 <span>Subtotal</span>
                 <span>₹{subtotal}</span>
@@ -237,22 +212,16 @@ function Checkout() {
 
               <div className="total-row">
                 <span>Shipping</span>
-                <span>
-                  {shipping === 0 ? "FREE" : `₹${shipping}`}
-                </span>
+                <span>{shipping === 0 ? "FREE" : `₹${shipping}`}</span>
               </div>
 
               <div className="total-row grand-total">
                 <span>Total</span>
                 <span>₹{grandTotal}</span>
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
     </div>
   );
