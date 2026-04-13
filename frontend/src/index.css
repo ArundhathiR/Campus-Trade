@@ -1,76 +1,387 @@
-/* App.css - Global Styles for CampusTrade */
+/* CampusTrade — Aurora Vibrant Theme */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* 1. CSS Reset & Typography */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* ═══════════════════════════════════════════
+   1. BASE
+   ═══════════════════════════════════════════ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Inter', 'Poppins', sans-serif;
-  font-size: 16px;
-  background-color: #f4f7f6; /* Light Gray Background */
-  color: #2c3e50;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #f8faff;
+  color: #1e293b;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
-/* 2. Global Layout Container */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* ═══════════════════════════════════════════
+   2. SCROLLBAR
+   ═══════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-/* 3. Link Standardizing */
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #8b5cf6, #3b82f6);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #7c3aed, #2563eb);
+}
+
 a {
   text-decoration: none;
   color: inherit;
-  transition: color 0.3s ease;
 }
 
-/* 4. Global Button System */
-.btn {
-  padding: 10px 22px;
-  border-radius: 8px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-block;
-  text-align: center;
+/* ═══════════════════════════════════════════
+   3. GLASS & CARD UTILITIES
+   ═══════════════════════════════════════════ */
+@layer components {
+
+  .aurora-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .aurora-card-hover:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15), 0 4px 20px rgba(0, 0, 0, 0.06);
+    border-color: rgba(139, 92, 246, 0.2);
+  }
+
+  .aurora-input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    color: #1e293b;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .aurora-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .aurora-input:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12), 0 4px 20px rgba(139, 92, 246, 0.08);
+    background: white;
+  }
+
+  .aurora-select {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px solid #e2e8f0;
+    border-radius: 14px;
+    color: #1e293b;
+    font-size: 1rem;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6.5 6.5 6.5-6.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .aurora-select:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    background-color: white;
+  }
+
+  /* Primary Gradient Button */
+  .btn-aurora {
+    position: relative;
+    background: linear-gradient(135deg, #8b5cf6, #3b82f6, #06b6d4);
+    background-size: 200% 200%;
+    color: white;
+    font-weight: 600;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px rgba(139, 92, 246, 0.3);
+    overflow: hidden;
+  }
+
+  .btn-aurora:hover {
+    background-position: right center;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+  }
+
+  .btn-aurora:active {
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 2px 10px rgba(139, 92, 246, 0.3);
+    transition: all 0.1s;
+  }
+
+  /* Ripple effect on click */
+  .btn-aurora::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 60%);
+    transform: scale(0);
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.3s;
+    border-radius: inherit;
+  }
+
+  .btn-aurora:active::after {
+    transform: scale(4);
+    opacity: 1;
+    transition: transform 0s, opacity 0s;
+  }
+
+  /* Secondary soft button */
+  .btn-soft {
+    background: rgba(139, 92, 246, 0.08);
+    color: #7c3aed;
+    font-weight: 600;
+    padding: 12px 24px;
+    border: 2px solid rgba(139, 92, 246, 0.15);
+    border-radius: 14px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .btn-soft:hover {
+    background: rgba(139, 92, 246, 0.14);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-soft:active {
+    transform: scale(0.97);
+  }
+
+  /* Danger button */
+  .btn-danger {
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(244, 63, 94, 0.35);
+  }
+
+  .btn-danger:active {
+    transform: scale(0.97);
+  }
+
+  /* Shimmer skeleton */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 12px;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
 }
 
-.btn-primary {
-  background-color: #3498db; /* Primary Blue */
-  color: white;
+/* ═══════════════════════════════════════════
+   4. ANIMATED BACKGROUND
+   ═══════════════════════════════════════════ */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: #f8faff;
 }
 
-.btn-primary:hover {
-  background-color: #2980b9;
-  transform: translateY(-1px);
+.aurora-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  animation: morph 8s ease-in-out infinite;
 }
 
-.btn-secondary {
-  background-color: #2ecc71; /* Secondary Green */
-  color: white;
+.aurora-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #c4b5fd, #93c5fd);
+  top: -15%;
+  left: -8%;
+  animation-delay: 0s;
 }
 
-.btn-secondary:hover {
-  background-color: #27ae60;
-  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+.aurora-orb-2 {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #f9a8d4, #c084fc);
+  top: 40%;
+  right: -10%;
+  animation-delay: 2s;
 }
 
-/* 5. Utility Classes */
-.text-center { text-align: center; }
-.mt-20 { margin-top: 20px; }
-.mb-20 { margin-bottom: 20px; }
+.aurora-orb-3 {
+  width: 450px;
+  height: 450px;
+  background: linear-gradient(135deg, #6ee7b7, #67e8f9);
+  bottom: -15%;
+  left: 25%;
+  animation-delay: 4s;
+}
 
-/* 6. Form Defaults */
-input, textarea, select {
+.aurora-orb-4 {
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #fde68a, #fca5a5);
+  top: 15%;
+  right: 20%;
+  animation-delay: 6s;
+}
+
+@keyframes morph {
+
+  0%,
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    transform: translate(0, 0) scale(1);
+  }
+
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+    transform: translate(20px, -30px) scale(1.05);
+  }
+
+  50% {
+    border-radius: 50% 60% 30% 60% / 40% 50% 60% 50%;
+    transform: translate(-10px, 20px) scale(0.95);
+  }
+
+  75% {
+    border-radius: 40% 60% 50% 40% / 60% 40% 50% 60%;
+    transform: translate(15px, 10px) scale(1.02);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   5. FORM & MISC
+   ═══════════════════════════════════════════ */
+input,
+textarea,
+select {
   font-family: inherit;
   font-size: 1rem;
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Floating shapes for hero */
+.floating-shape {
+  position: absolute;
+  pointer-events: none;
+}
+
+.shape-circle {
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.shape-ring {
+  border-radius: 50%;
+  border: 2px solid rgba(139, 92, 246, 0.15);
+  background: transparent;
+}
+
+.shape-square {
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(251, 113, 133, 0.1));
+  border: 1px solid rgba(244, 63, 94, 0.1);
+  transform: rotate(15deg);
+}
+
+.shape-triangle {
+  width: 0;
+  height: 0;
+  border-left: 30px solid transparent;
+  border-right: 30px solid transparent;
+  border-bottom: 50px solid rgba(16, 185, 129, 0.12);
 }

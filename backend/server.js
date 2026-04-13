@@ -23,17 +23,15 @@ app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 
 // serve uploaded images
-
-
-const PORT = process.env.PORT || 5000;
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); const PORT = process.env.PORT || 5000;
 
 mongoose.connect(process.env.MONGO_URI)
-.then(() => {
-  console.log("MongoDB Connected");
+  .then(() => {
+    console.log("MongoDB Connected");
 
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
 
-})
-.catch(err => console.log(err));
+  })
+  .catch(err => console.log(err));
